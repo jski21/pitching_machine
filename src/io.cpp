@@ -108,6 +108,9 @@ void readInputs(InputSnapshot &snapshot) {
     snapshot.pitchNormalized = normalizeAdc(pitchFiltered, PITCH_POT_ADC_MIN, PITCH_POT_ADC_MAX);
     snapshot.spinNormalized  = normalizeAdc(spinFiltered, SPIN_POT_ADC_MIN, SPIN_POT_ADC_MAX);
 
+    if (INVERT_PITCH_POT) snapshot.pitchNormalized = 1.0f - snapshot.pitchNormalized;
+    if (INVERT_SPIN_POT)  snapshot.spinNormalized  = 1.0f - snapshot.spinNormalized;
+
     snapshot.pitchInPlausibleRange = isPlausible(pitchRaw, PITCH_POT_ADC_MIN, PITCH_POT_ADC_MAX);
     snapshot.spinInPlausibleRange  = isPlausible(spinRaw, SPIN_POT_ADC_MIN, SPIN_POT_ADC_MAX);
 }

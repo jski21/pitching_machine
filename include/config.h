@@ -60,6 +60,18 @@
 #define ADC_PLAUSIBLE_MARGIN   200
 
 // ---------------------------------------------------------------------------
+// Potentiometer direction inversion
+//
+// Set to true if turning a knob clockwise decreases its reading instead of
+// increasing it (i.e. the wiper moves toward GND rather than toward 3.3V
+// as you turn up). This applies AFTER normalization so the plausibility
+// check and ADC calibration range are unaffected — just flip this flag
+// instead of re-wiring the pot.
+// ---------------------------------------------------------------------------
+#define INVERT_PITCH_POT       true
+#define INVERT_SPIN_POT        true
+
+// ---------------------------------------------------------------------------
 // Input filtering (moving average / low-pass)
 //
 // FILTER_SAMPLE_COUNT: number of samples averaged for the moving-average
