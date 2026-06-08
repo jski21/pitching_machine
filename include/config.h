@@ -69,7 +69,7 @@
 // instead of re-wiring the pot.
 // ---------------------------------------------------------------------------
 #define INVERT_PITCH_POT       true
-#define INVERT_SPIN_POT        true
+#define INVERT_SPIN_POT        false
 
 // ---------------------------------------------------------------------------
 // Input filtering (moving average / low-pass)
