@@ -136,6 +136,26 @@
 #define HARD_SAFETY_MAX_COMMAND 1.0f
 
 // ---------------------------------------------------------------------------
+// Per-wheel balance trim (normalized, added after mixing math)
+//
+// Use these to compensate for one wheel running physically slower than the
+// others -- e.g. a motor that is slightly weaker, or belt tension differences.
+// Applied after all mixing and before the hard safety ceiling, always,
+// regardless of spin rate or angle.
+//
+// Start with 0.0 on all three. If the ball is drifting left/right with the
+// spin knob at zero, bump the slow wheel up in small steps (e.g. 0.02-0.05)
+// until the ball flies straight. Positive = faster, negative = slower.
+//
+//   Wheel A = bottom-middle
+//   Wheel B = top-right
+//   Wheel C = top-left
+// ---------------------------------------------------------------------------
+#define WHEEL_A_TRIM           0.00f
+#define WHEEL_B_TRIM           0.00f
+#define WHEEL_C_TRIM           0.00f
+
+// ---------------------------------------------------------------------------
 // Spin mixing limits
 //
 // SPIN_MAX_DELTA: maximum normalized contribution that the spin pot can add

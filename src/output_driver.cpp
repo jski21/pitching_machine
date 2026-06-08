@@ -111,9 +111,9 @@ static float applyHardSafetyCeiling(float cmd) {
 }
 
 void applyOutput(const WheelCommands &commands, OutputValues &out) {
-    float a = applyHardSafetyCeiling(commands.a);
-    float b = applyHardSafetyCeiling(commands.b);
-    float c = applyHardSafetyCeiling(commands.c);
+    float a = applyHardSafetyCeiling(commands.a + WHEEL_A_TRIM);
+    float b = applyHardSafetyCeiling(commands.b + WHEEL_B_TRIM);
+    float c = applyHardSafetyCeiling(commands.c + WHEEL_C_TRIM);
 
     out.normalizedA = a;
     out.normalizedB = b;
