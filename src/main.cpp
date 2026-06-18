@@ -78,6 +78,20 @@ void setup() {
     delay(BOOT_SAFETY_DELAY_MS);
 
     // -----------------------------------------------------------------
+    // Warm up the moving-average filters before arming. The filter
+    // buffers start zero-initialized; reading them before they've
+    // collected real samples would dilute the average toward zero,
+    // which (combined with pot inversion) could momentarily read as a
+    // max-command spike. This runs unconditionally, regardless of the
+    // knob-position gate below, and takes only FILTER_SAMPLE_COUNT loop
+    // iterations (milliseconds).
+    // -----------------------------------------------------------------
+    while (!ioFiltersWarmedUp()) {
+        readInputs(g_inputs);
+        setAllOutputsSafe(g_outputs);
+    }
+
+    // -----------------------------------------------------------------
     // Optional gate: require the speed knob to be at minimum before the
     // controller will arm outputs. This prevents a machine left with the
     // speed knob "hot" from immediately throwing on power-up.
