@@ -74,7 +74,7 @@
 // check and ADC calibration range are unaffected — just flip this flag
 // instead of re-wiring the pot.
 // ---------------------------------------------------------------------------
-#define INVERT_PITCH_POT       true
+#define INVERT_PITCH_POT       false
 #define INVERT_SPIN_POT        false
 
 // ---------------------------------------------------------------------------
