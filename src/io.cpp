@@ -158,6 +158,7 @@ void updateEncoder(InputSnapshot &snapshot) {
     snapshot.encoderCount = count;
 
     float degrees = (float)count * DEGREES_PER_CLICK;
+    if (INVERT_SPIN_DIR_ENCODER) degrees = -degrees;
     snapshot.spinAngleDegrees = wrapAngleDegrees(degrees);
 #elif SPIN_DIRECTION_SOURCE == SPIN_SOURCE_POT_360
     // 360-degree rotation pot: read ADC, filter, normalize against the pot's

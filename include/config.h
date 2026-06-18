@@ -74,7 +74,7 @@
 // check and ADC calibration range are unaffected — just flip this flag
 // instead of re-wiring the pot.
 // ---------------------------------------------------------------------------
-#define INVERT_PITCH_POT       false
+#define INVERT_PITCH_POT       true
 #define INVERT_SPIN_POT        false
 
 // ---------------------------------------------------------------------------
@@ -111,6 +111,11 @@
 // VERIFY ON-SITE: run esp32_diagnostic, rotate the knob exactly one full
 // turn, read the change in encCount, and set this to that number.
 #define ENCODER_COUNTS_PER_REV   80
+
+// Reverse the spin-direction sense without re-wiring: when true, the
+// accumulated encoder angle is negated (clockwise vs counter-clockwise
+// rotation is flipped) before being used by the mixing math.
+#define INVERT_SPIN_DIR_ENCODER  true
 
 // Minimum time (microseconds) between accepted A/B edges, used to reject
 // mechanical contact bounce in the ISR. Cheap encoders like the EC11 can
