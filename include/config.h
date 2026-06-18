@@ -237,7 +237,7 @@
 
 // When true, outputs stay disabled at boot until explicitly armed in code
 // (see ENABLE_OUTPUTS_AT_BOOT below combined with the speed-knob check).
-#define REQUIRE_SPEED_KNOB_AT_MIN_ON_BOOT  true
+#define REQUIRE_SPEED_KNOB_AT_MIN_ON_BOOT  false
 
 // Knob is considered "at minimum" if its normalized value is below this
 // threshold during the boot check.
