@@ -99,12 +99,18 @@
 #define SPIN_SOURCE_ENCODER    1
 #define SPIN_SOURCE_POT_360    2
 
-#define SPIN_DIRECTION_SOURCE  SPIN_SOURCE_POT_360
+#define SPIN_DIRECTION_SOURCE  SPIN_SOURCE_ENCODER
 
 // --- Quadrature encoder settings (used when SPIN_SOURCE_ENCODER) -----------
 // Encoder counts per full mechanical revolution of the spin-direction dial.
 // Used with DEGREES_PER_CLICK to convert encoder counts to an angle.
-#define ENCODER_COUNTS_PER_REV   480
+//
+// For an EC11-style 11mm incremental encoder this firmware counts on every
+// A/B edge (4 counts per quadrature cycle). A typical 20-detent EC11 yields
+// ~80 counts per physical revolution, so 80 is a sensible starting point.
+// VERIFY ON-SITE: run esp32_diagnostic, rotate the knob exactly one full
+// turn, read the change in encCount, and set this to that number.
+#define ENCODER_COUNTS_PER_REV   80
 
 // Degrees of spin-angle change per encoder click (quadrature edge count).
 // Override this directly if the dial does not map 1:1 to 360 degrees,
