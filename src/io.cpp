@@ -30,6 +30,7 @@ static long spinDirSampleSum   = 0;
 // ---------------------------------------------------------------------------
 static volatile long encoderCount = 0;
 static volatile uint8_t lastEncoderState = 0;
+static volatile unsigned long lastEncoderEdgeMicros = 0;
 
 // Quadrature transition table indexed by (previous state << 2 | new state).
 // Valid forward transitions yield +1, valid reverse transitions yield -1,
@@ -42,6 +43,17 @@ static const int8_t QUADRATURE_TABLE[16] = {
 };
 
 static void IRAM_ATTR encoderISR() {
+    // Debounce: ignore edges arriving faster than mechanical contact bounce
+    // could plausibly settle. A skipped edge just makes the next accepted
+    // edge look like a 2-bit "diagonal" jump, which QUADRATURE_TABLE already
+    // treats as invalid (0) rather than a false count -- so dropping edges
+    // here is safe, never produces a wrong-direction count.
+    unsigned long now = micros();
+    if (now - lastEncoderEdgeMicros < ENCODER_DEBOUNCE_US) {
+        return;
+    }
+    lastEncoderEdgeMicros = now;
+
     uint8_t a = (uint8_t)digitalRead(PIN_ENCODER_A);
     uint8_t b = (uint8_t)digitalRead(PIN_ENCODER_B);
     uint8_t newState = (uint8_t)((a << 1) | b);

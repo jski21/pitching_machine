@@ -112,6 +112,13 @@
 // turn, read the change in encCount, and set this to that number.
 #define ENCODER_COUNTS_PER_REV   80
 
+// Minimum time (microseconds) between accepted A/B edges, used to reject
+// mechanical contact bounce in the ISR. Cheap encoders like the EC11 can
+// bounce for a few hundred microseconds to a couple of milliseconds per
+// transition. Increase if angle readings still jitter; decrease if fast
+// rotation feels like it's losing counts.
+#define ENCODER_DEBOUNCE_US      800
+
 // Degrees of spin-angle change per encoder click (quadrature edge count).
 // Override this directly if the dial does not map 1:1 to 360 degrees,
 // e.g. a dial with a gear ratio or a partial-turn range.
