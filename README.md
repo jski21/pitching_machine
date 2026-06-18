@@ -20,8 +20,9 @@ file is the fastest way to isolate the problem.
 |-----------------------------|----------------------------------------------|-------|
 | Pitch speed potentiometer   | GPIO34 (`PIN_PITCH_SPEED_POT`)               | ADC1 input-only pin, wiper to pin, ends to 3.3V/GND |
 | Spin rate potentiometer     | GPIO35 (`PIN_SPIN_RATE_POT`)                 | ADC1 input-only pin, wiper to pin, ends to 3.3V/GND |
-| Spin direction encoder A    | GPIO25 (`PIN_ENCODER_A`)                     | Quadrature channel A, internal pull-up enabled |
-| Spin direction encoder B    | GPIO26 (`PIN_ENCODER_B`)                     | Quadrature channel B, internal pull-up enabled |
+| Spin direction encoder A    | GPIO25 (`PIN_ENCODER_A`)                     | Only if `SPIN_DIRECTION_SOURCE = SPIN_SOURCE_ENCODER`. Quadrature channel A, internal pull-up enabled |
+| Spin direction encoder B    | GPIO26 (`PIN_ENCODER_B`)                     | Only if `SPIN_DIRECTION_SOURCE = SPIN_SOURCE_ENCODER`. Quadrature channel B, internal pull-up enabled |
+| Spin direction 360° pot     | GPIO39 (`PIN_SPIN_DIR_POT`)                  | Only if `SPIN_DIRECTION_SOURCE = SPIN_SOURCE_POT_360` (default). ADC1 input-only; wiper to pin, ends to 3.3V/GND |
 | Motor A signal              | GPIO32 (`PIN_MOTOR_A`)                       | PWM or servo pulse to motor controller "Wheel A" |
 | Motor B signal              | GPIO33 (`PIN_MOTOR_B`)                       | PWM or servo pulse to motor controller "Wheel B" |
 | Motor C signal              | GPIO27 (`PIN_MOTOR_C`)                       | PWM or servo pulse to motor controller "Wheel C" |
@@ -113,13 +114,19 @@ All calibration constants live in `include/config.h`. Typical procedure:
      `rawPitch` value printed. Repeat at the physical maximum.
    - Enter those two numbers as `PITCH_POT_ADC_MIN` / `PITCH_POT_ADC_MAX`.
    - Repeat for the spin-rate pot → `SPIN_POT_ADC_MIN` / `SPIN_POT_ADC_MAX`.
-3. **Check the encoder direction and scale:**
-   - Rotate the spin-direction dial one full turn and confirm `angle`
-     wraps cleanly through 0–360°.
-   - If the angle increases when it should decrease (or vice versa), swap
-     `PIN_ENCODER_A` / `PIN_ENCODER_B`.
-   - If one physical revolution doesn't correspond to 360°, adjust
-     `ENCODER_COUNTS_PER_REV` (or override `DEGREES_PER_CLICK` directly).
+3. **Check the spin-direction input direction and scale.** Set
+   `SPIN_DIRECTION_SOURCE` to match the installed hardware:
+   - **`SPIN_SOURCE_POT_360` (default, 360° rotation pot):** rotate the dial
+     end to end and note the raw ADC values at each extreme; enter them as
+     `SPIN_DIR_POT_ADC_MIN` / `SPIN_DIR_POT_ADC_MAX`. Confirm `angle` sweeps
+     0–360° across the travel. If it counts the wrong way, set
+     `INVERT_SPIN_DIR_POT` to `true`. If the usable electrical range is less
+     than a full turn, reduce `SPIN_DIR_ANGLE_SPAN`.
+   - **`SPIN_SOURCE_ENCODER` (quadrature encoder):** rotate the dial one full
+     turn and confirm `angle` wraps cleanly through 0–360°. If the angle
+     counts the wrong way, swap `PIN_ENCODER_A` / `PIN_ENCODER_B`. If one
+     revolution doesn't correspond to 360°, adjust `ENCODER_COUNTS_PER_REV`
+     (or override `DEGREES_PER_CLICK` directly).
 4. **Tune filtering:** if `normPitch`/`normSpin` are noisy/jittery, increase
    `FILTER_SAMPLE_COUNT` (smoother but slower to respond). If response feels
    sluggish, decrease it.

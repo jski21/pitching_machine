@@ -31,8 +31,14 @@
 #define PIN_PITCH_SPEED_POT    34   // ADC1_CH6, input only
 #define PIN_SPIN_RATE_POT      35   // ADC1_CH7, input only
 
+// Spin-direction input. Two hardware options are supported (pick one with
+// SPIN_DIRECTION_SOURCE below):
+//   - Quadrature encoder on PIN_ENCODER_A / PIN_ENCODER_B
+//   - 3-wire 360-degree rotation potentiometer on PIN_SPIN_DIR_POT (ADC)
 #define PIN_ENCODER_A          25
 #define PIN_ENCODER_B          26
+
+#define PIN_SPIN_DIR_POT       39   // ADC1_CH3, input only (360-deg spin-dir pot)
 
 #define PIN_MOTOR_A            32
 #define PIN_MOTOR_B            33
@@ -81,8 +87,21 @@
 #define FILTER_SAMPLE_COUNT    16
 
 // ---------------------------------------------------------------------------
-// Quadrature encoder (spin direction)
+// Spin-direction source selection
+//
+// SPIN_SOURCE_ENCODER  : quadrature encoder on PIN_ENCODER_A / PIN_ENCODER_B
+// SPIN_SOURCE_POT_360  : 3-wire 360-degree rotation potentiometer (ADC) on
+//                        PIN_SPIN_DIR_POT, voltage swept linearly maps to
+//                        0..360 degrees of spin angle.
+//
+// Set SPIN_DIRECTION_SOURCE to whichever is physically installed.
 // ---------------------------------------------------------------------------
+#define SPIN_SOURCE_ENCODER    1
+#define SPIN_SOURCE_POT_360    2
+
+#define SPIN_DIRECTION_SOURCE  SPIN_SOURCE_POT_360
+
+// --- Quadrature encoder settings (used when SPIN_SOURCE_ENCODER) -----------
 // Encoder counts per full mechanical revolution of the spin-direction dial.
 // Used with DEGREES_PER_CLICK to convert encoder counts to an angle.
 #define ENCODER_COUNTS_PER_REV   480
@@ -91,6 +110,22 @@
 // Override this directly if the dial does not map 1:1 to 360 degrees,
 // e.g. a dial with a gear ratio or a partial-turn range.
 #define DEGREES_PER_CLICK      (360.0f / ENCODER_COUNTS_PER_REV)
+
+// --- 360-degree pot settings (used when SPIN_SOURCE_POT_360) ---------------
+// Raw ADC counts at the two ends of the pot's electrical travel. A 360-deg
+// rotation pot sweeps voltage across (nearly) a full turn; calibrate the
+// same way as the other pots using esp32_diagnostic. The normalized 0..1
+// reading is then scaled to SPIN_DIR_ANGLE_SPAN degrees.
+#define SPIN_DIR_POT_ADC_MIN   120
+#define SPIN_DIR_POT_ADC_MAX   4000
+
+// Degrees represented by the full electrical travel of the pot. 360 for a
+// true single-turn 360-deg pot; reduce if the usable electrical range is
+// less than a full turn.
+#define SPIN_DIR_ANGLE_SPAN    360.0f
+
+// Set true if turning the dial clockwise decreases the angle reading.
+#define INVERT_SPIN_DIR_POT    false
 
 // ---------------------------------------------------------------------------
 // Output mode

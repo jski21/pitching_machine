@@ -13,6 +13,14 @@ static long pitchSampleSum   = 0;
 static long spinSampleSum    = 0;
 static int  samplesCollected = 0;
 
+#if SPIN_DIRECTION_SOURCE == SPIN_SOURCE_POT_360
+// Separate moving-average buffer for the 360-degree spin-direction pot.
+static int  spinDirSampleBuf[FILTER_SAMPLE_COUNT];
+static int  spinDirSampleIndex = 0;
+static long spinDirSampleSum   = 0;
+#endif
+
+#if SPIN_DIRECTION_SOURCE == SPIN_SOURCE_ENCODER
 // ---------------------------------------------------------------------------
 // Quadrature encoder state
 //
@@ -41,6 +49,7 @@ static void IRAM_ATTR encoderISR() {
     encoderCount += QUADRATURE_TABLE[index & 0x0F];
     lastEncoderState = newState;
 }
+#endif
 
 void ioInit() {
     // ESP32 ADC1 pins (32-39) work without conflicting with WiFi.
@@ -51,6 +60,7 @@ void ioInit() {
     pinMode(PIN_PITCH_SPEED_POT, INPUT);
     pinMode(PIN_SPIN_RATE_POT, INPUT);
 
+#if SPIN_DIRECTION_SOURCE == SPIN_SOURCE_ENCODER
     pinMode(PIN_ENCODER_A, INPUT_PULLUP);
     pinMode(PIN_ENCODER_B, INPUT_PULLUP);
 
@@ -60,16 +70,27 @@ void ioInit() {
 
     attachInterrupt(digitalPinToInterrupt(PIN_ENCODER_A), encoderISR, CHANGE);
     attachInterrupt(digitalPinToInterrupt(PIN_ENCODER_B), encoderISR, CHANGE);
+#elif SPIN_DIRECTION_SOURCE == SPIN_SOURCE_POT_360
+    analogSetPinAttenuation(PIN_SPIN_DIR_POT, ADC_11db);
+    pinMode(PIN_SPIN_DIR_POT, INPUT);
+#endif
 
     for (int i = 0; i < FILTER_SAMPLE_COUNT; i++) {
         pitchSampleBuf[i] = 0;
         spinSampleBuf[i]  = 0;
+#if SPIN_DIRECTION_SOURCE == SPIN_SOURCE_POT_360
+        spinDirSampleBuf[i] = 0;
+#endif
     }
     pitchSampleSum = 0;
     spinSampleSum  = 0;
     pitchSampleIndex = 0;
     spinSampleIndex  = 0;
     samplesCollected = 0;
+#if SPIN_DIRECTION_SOURCE == SPIN_SOURCE_POT_360
+    spinDirSampleSum   = 0;
+    spinDirSampleIndex = 0;
+#endif
 }
 
 // Push a new raw sample into a ring-buffer moving average and return the
@@ -116,6 +137,7 @@ void readInputs(InputSnapshot &snapshot) {
 }
 
 void updateEncoder(InputSnapshot &snapshot) {
+#if SPIN_DIRECTION_SOURCE == SPIN_SOURCE_ENCODER
     // Snapshot the volatile counter atomically with interrupts paused.
     noInterrupts();
     long count = encoderCount;
@@ -125,6 +147,20 @@ void updateEncoder(InputSnapshot &snapshot) {
 
     float degrees = (float)count * DEGREES_PER_CLICK;
     snapshot.spinAngleDegrees = wrapAngleDegrees(degrees);
+#elif SPIN_DIRECTION_SOURCE == SPIN_SOURCE_POT_360
+    // 360-degree rotation pot: read ADC, filter, normalize against the pot's
+    // calibrated electrical travel, then scale to spin angle.
+    int raw = analogRead(PIN_SPIN_DIR_POT);
+    int filtered = pushSample(spinDirSampleBuf, spinDirSampleIndex, spinDirSampleSum, raw);
+
+    float norm = normalizeAdc(filtered, SPIN_DIR_POT_ADC_MIN, SPIN_DIR_POT_ADC_MAX);
+    if (INVERT_SPIN_DIR_POT) norm = 1.0f - norm;
+
+    // Expose the raw ADC count via encoderCount so the debug log still shows
+    // a useful "count" field for this input.
+    snapshot.encoderCount = (long)raw;
+    snapshot.spinAngleDegrees = wrapAngleDegrees(norm * SPIN_DIR_ANGLE_SPAN);
+#endif
 }
 
 bool ioFiltersWarmedUp() {
